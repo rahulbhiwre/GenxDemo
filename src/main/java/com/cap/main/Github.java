@@ -1,21 +1,13 @@
 package com.cap.main;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URI;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Github {
 
@@ -25,23 +17,34 @@ public class Github {
 	}
 
 	public static void postGit() throws IOException, URISyntaxException, JSONException {
-		CloseableHttpClient client = HttpClients.createDefault();
-		HttpGet httpGet = new HttpGet("https://api.github.com/repos/{owner}/{repo}/branches");
-		URI uri = new URIBuilder(httpGet.getURI()).addParameter("owner", "rahulbhiwre").addParameter("repo", "GenxDemo")
-//				.addParameter("repo", "GenxDemo")
-//				.addParameter("repo", "GenxDemo")
-//				.addParameter("repo", "GenxDemo")
-				.build();
-		httpGet.setURI(uri);
-		httpGet.addHeader("accept", "application/vnd.github+json");
-		httpGet.addHeader("Authorization", "Bearer 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");
-		CloseableHttpResponse response = client.execute(httpGet);
-		client.close();
+		HttpURLConnection httpClient = null;
+		String githubUrl = "https://api.github.com/repos/rahulbhiwre/QuizRestApi/branches";
+		httpClient = (HttpURLConnection) new URL(githubUrl).openConnection();
 
-		String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
-		JSONObject responseJson = new JSONObject(responseString);
-		System.out.println("Response Json from GET API-->" + responseJson);
+		String userName = "rahulbhiwre";
+		String password = "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";
+		String auth = userName + ":" + password;
+		byte[] encodedAuth = org.apache.commons.codec.binary.Base64
+				.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
+		String authHeader = "Basic " + new String(encodedAuth);
+
+		httpClient.setRequestProperty("Authorization", authHeader);
+		httpClient.setDoOutput(true);
+		int responseCode = httpClient.getResponseCode();
+		System.out.println(responseCode);
+
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(httpClient.getInputStream()))) {
+			String line;
+			StringBuilder response = new StringBuilder();
+			while ((line = in.readLine()) != null) {
+				response.append(line);
+			}
+			System.out.println(response.toString());
+
+		} catch (Exception e) {
+			System.out.println("in catch");
+			System.out.println(e.getMessage());
+		}
 
 	}
-
 }
