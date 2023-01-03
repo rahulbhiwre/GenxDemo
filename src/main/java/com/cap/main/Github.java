@@ -8,6 +8,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import org.json.JSONException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 public class Github {
 
@@ -22,7 +24,7 @@ public class Github {
 		httpClient = (HttpURLConnection) new URL(githubUrl).openConnection();
 
 		String userName = "rahulbhiwre";
-		String password = "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";
+		String password = "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";
 		String auth = userName + ":" + password;
 		byte[] encodedAuth = org.apache.commons.codec.binary.Base64
 				.encodeBase64(auth.getBytes(StandardCharsets.ISO_8859_1));
@@ -31,7 +33,7 @@ public class Github {
 		httpClient.setRequestProperty("Authorization", authHeader);
 		httpClient.setDoOutput(true);
 		int responseCode = httpClient.getResponseCode();
-		System.out.println(responseCode);
+		System.out.println("responseCode : " + responseCode);
 
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(httpClient.getInputStream()))) {
 			String line;
@@ -40,6 +42,10 @@ public class Github {
 				response.append(line);
 			}
 			System.out.println(response.toString());
+
+			JSONParser parser1 = new JSONParser();
+			Object json = parser1.parse(response.toString());
+			System.out.println(json);
 
 		} catch (Exception e) {
 			System.out.println("in catch");
